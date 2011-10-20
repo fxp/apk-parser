@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<configuration>
+<srv_addr>127.0.0.1</srv_addr>
+<srv_port>22222</srv_port>
+<srv_name>FileUpload</srv_name>
+</configuration>

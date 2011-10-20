@@ -1,0 +1,28 @@
+from com.android.monkeyrunner import MonkeyRunner, MonkeyDevice
+import os,sys
+device = MonkeyRunner.waitForConnection()
+
+apkFolder=sys.argv[1]
+count=1
+# Takes a screenshot
+imgs=[]
+while(True):
+	print("Take a snapshot?(ANYKEY/q)");
+	cmd=raw_input()
+	if(cmd=='q'):
+		print('Total '+str(count-1)+' snapshot')
+		sys.exit(0)
+	result = device.takeSnapshot()
+	
+	toAdd=True
+	for img in imgs:
+		if(img.sameAs(result,0.99)):
+			print('You have already got a same one')
+			toAdd=False
+			break;
+	if(toAdd==True):
+		print('Saving snapshot '+apkFolder+'s'+str(count)+'.png')
+		imgs.append(result)
+		result.writeToFile(apkFolder+'s'+str(count)+'.png','png')
+		print('Saved')
+		count+=1
