@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<classpath>
+	<classpathentry kind="src" path="src"/>
+	<classpathentry kind="con" path="org.eclipse.jdt.launching.JRE_CONTAINER/org.eclipse.jdt.internal.debug.ui.launcher.StandardVMType/JavaSE-1.6"/>
+	<classpathentry combineaccessrules="false" kind="src" path="/PackageParser"/>
+	<classpathentry kind="lib" path="lib/dex2jar/asm-debug-all-3.2.jar"/>
+	<classpathentry kind="lib" path="lib/dex2jar/commons-io-2.0.jar"/>
+	<classpathentry kind="lib" path="lib/dex2jar/dex2jar-0.0.7.9-SNAPSHOT.jar"/>
+	<classpathentry kind="lib" path="lib/dex2jar/slf4j-api-1.5.6.jar"/>
+	<classpathentry kind="lib" path="lib/dex2jar/slf4j-simple-1.5.6.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/ant.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/bloat-1.0.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-all-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-bench.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-core-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-cs-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-cs.optional-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-db4ounit-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-instrumentation-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-nqopt-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-optional-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-osgi-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-osgi-test-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-taj-java5.jar"/>
+	<classpathentry kind="lib" path="lib/db4o/lib/db4o-8.0.184.15484-tools-java5.jar"/>
+	<classpathentry kind="output" path="bin"/>
+</classpath>
