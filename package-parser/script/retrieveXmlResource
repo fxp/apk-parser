@@ -1,0 +1,3 @@
+APK_PATH=T:\apks\fin\tgbus_game_2285
+aapt dump xmltree APK_PATH AndroidManifest.xml >AndroidManifest.xml
+aapt dump --values resources APK_PATH >resources.txt
