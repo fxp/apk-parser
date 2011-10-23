@@ -31,6 +31,8 @@ import org.xml.sax.SAXException;
 
 import brut.apktool.Main;
 
+import com.db4o.Db4oEmbedded;
+import com.db4o.ObjectContainer;
 import com.iw.core.apk.ApkInfo.JarEntryInfo;
 import com.iw.core.common.ApkUtil;
 import com.iw.core.common.FileUtil;
@@ -123,6 +125,8 @@ public class ApkParser {
 		boolean ret = false;
 		try {
 			File baseFile = new File(tmpDir + File.separator + ASSET_DIR);
+			if (!baseFile.exists())
+				return true;
 			Collection<File> files = FileUtils.listFiles(baseFile, null, true);
 
 			for (File file : files) {
@@ -317,24 +321,33 @@ public class ApkParser {
 		// unpack apk file
 		// ApkInfo info = ApkParser
 		// .readApk("/home/fxp/Downloads/MobeeBook_soho_11.00.30.apk");
-		// C:\Users\FXP\Downloads
-		ApkInfo info = ApkParser
-				.readApk("C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.apk");
-		FileOutputStream fos = null;
-		ObjectOutputStream out = null;
-		fos = new FileOutputStream(
-				"C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.info");
-		out = new ObjectOutputStream(fos);
-		out.writeObject(info);
-		out.close();
+		// "C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.apk"
+		ObjectContainer container = Db4oEmbedded.openFile("G:\\yingyonghui.db4o");
 
-		FileInputStream fis = new FileInputStream(
-				"C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.info");
-		ObjectInputStream ois = new ObjectInputStream(fis);
-		ApkInfo info2 = (ApkInfo) ois.readObject();
+		File[] files = (new File("d:\\yingyonghui")).listFiles();
+		for (File file : files) {
+			if (!file.isFile())
+				continue;
+			ApkInfo info = ApkParser.readApk(file.getAbsolutePath());
+			container.store(info);
+			container.commit();
+		}
+		container.close();
 
-		System.out.println(info2);
+		// FileOutputStream fos = null;
+		// ObjectOutputStream out = null;
+		// fos = new FileOutputStream(
+		// "C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.info");
+		// out = new ObjectOutputStream(fos);
+		// out.writeObject(info);
+		// out.close();
+		//
+		// FileInputStream fis = new FileInputStream(
+		// "C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.info");
+		// ObjectInputStream ois = new ObjectInputStream(fis);
+		// ApkInfo info2 = (ApkInfo) ois.readObject();
+		//
+		// System.out.println(info2);
 
 	}
-
 }
