@@ -1,14 +1,20 @@
 package com.iw.core.apk;
 
 import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
+import java.io.ObjectInputStream;
+import java.io.ObjectOutputStream;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
 import java.util.Collection;
 import java.util.Enumeration;
 import java.util.HashSet;
+import java.util.Hashtable;
 import java.util.List;
+import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
@@ -25,6 +31,7 @@ import org.xml.sax.SAXException;
 
 import brut.apktool.Main;
 
+import com.iw.core.apk.ApkInfo.JarEntryInfo;
 import com.iw.core.common.ApkUtil;
 import com.iw.core.common.FileUtil;
 import com.iw.core.common.Hash;
@@ -134,7 +141,7 @@ public class ApkParser {
 	}
 
 	private static void getAllIcons(ApkInfo info, String tmpDir) {
-		Collection<JarEntry> entries = info.getEntries().values();
+		Collection<JarEntryInfo> entries = info.getEntries().values();
 		Set<String> iconNames = new HashSet<String>();
 		for (String iconPath : info.getIcon().jarPath) {
 			// All value start with @ means a reference
@@ -146,7 +153,7 @@ public class ApkParser {
 			// String prefix = iconPath.substring(0, splitOffset);
 			String postfix = iconPath.substring(splitOffset);
 
-			for (JarEntry entry : entries) {
+			for (JarEntryInfo entry : entries) {
 				String entryName = entry.getName();
 				if (entryName.startsWith("res/drawable")
 						&& entryName.endsWith(postfix + ".png")) {
@@ -194,6 +201,7 @@ public class ApkParser {
 
 		byte[] buf = new byte[2048];
 		JarFile jf = null;
+		Map<String, JarEntry> jarEntries = new Hashtable<String, JarEntry>();
 		try {
 			jf = new JarFile(info.getPath());
 			if (jf.getManifest() == null)
@@ -202,6 +210,7 @@ public class ApkParser {
 			while (entries.hasMoreElements()) {
 				JarEntry entry = entries.nextElement();
 				info.addEntry(entry.getName(), entry);
+				jarEntries.put(entry.getName(), entry);
 				InputStream is = null;
 				try {
 					is = jf.getInputStream(entry);
@@ -218,7 +227,7 @@ public class ApkParser {
 			// Get all certificates
 			Set<String> entryKeys = info.getEntries().keySet();
 			for (String entryKey : entryKeys) {
-				JarEntry je = info.getEntries().get(entryKey);
+				JarEntry je = jarEntries.get(entryKey);
 				if (jf.getManifest().getEntries().containsKey(entryKey)) {
 					Certificate[] cs = je.getCertificates();
 					if (cs != null && cs.length > 0) {
@@ -311,7 +320,20 @@ public class ApkParser {
 		// C:\Users\FXP\Downloads
 		ApkInfo info = ApkParser
 				.readApk("C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.apk");
-		System.out.println(info);
+		FileOutputStream fos = null;
+		ObjectOutputStream out = null;
+		fos = new FileOutputStream(
+				"C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.info");
+		out = new ObjectOutputStream(fos);
+		out.writeObject(info);
+		out.close();
+
+		FileInputStream fis = new FileInputStream(
+				"C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.info");
+		ObjectInputStream ois = new ObjectInputStream(fis);
+		ApkInfo info2 = (ApkInfo) ois.readObject();
+
+		System.out.println(info2);
 
 	}
 

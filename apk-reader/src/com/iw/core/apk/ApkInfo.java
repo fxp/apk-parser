@@ -1,7 +1,9 @@
 package com.iw.core.apk;
 
+import java.io.Serializable;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
@@ -9,10 +11,11 @@ import java.util.Map;
 import java.util.Set;
 import java.util.jar.JarEntry;
 
-public class ApkInfo {
+public class ApkInfo implements Serializable {
+
+	private static final long serialVersionUID = -7652985665552224926L;
 
 	private String path;
-	private String fileName;
 
 	private String label;
 	private String versionName;
@@ -32,7 +35,7 @@ public class ApkInfo {
 	// File hash
 	String fileHash;
 	// Zip entires
-	private Map<String, JarEntry> entries = new Hashtable<String, JarEntry>();
+	private Map<String, JarEntryInfo> entries = new Hashtable<String, JarEntryInfo>();
 	// Raw content of AndroidManifest.xml
 	private String rawAndroidManifest;
 	// Raw content of resources
@@ -76,14 +79,6 @@ public class ApkInfo {
 
 	public void setPath(String path) {
 		this.path = path;
-	}
-
-	public String getFileName() {
-		return fileName;
-	}
-
-	public void setFileName(String fileName) {
-		this.fileName = fileName;
 	}
 
 	public String getLabel() {
@@ -156,12 +151,12 @@ public class ApkInfo {
 		this.screenSupport = screenSupport;
 	}
 
-	public Map<String, JarEntry> getEntries() {
+	public Map<String, JarEntryInfo> getEntries() {
 		return entries;
 	}
 
 	public void addEntry(String name, JarEntry entry) {
-		getEntries().put(name, entry);
+		getEntries().put(name, new JarEntryInfo(entry));
 	}
 
 	public String getRawAndroidManifest() {
@@ -188,7 +183,7 @@ public class ApkInfo {
 		this.assets.put(assetName, asset);
 	}
 
-	public static class ApkScreenSupport {
+	public static class ApkScreenSupport implements Serializable{
 		Boolean resizeable = null;
 		Boolean smallScreens = null;
 		Boolean normalScreens = null;
@@ -200,7 +195,32 @@ public class ApkInfo {
 		int largestWidthLimitDp = -1;
 	}
 
-	public static class ApkIcon {
+	public static class ApkIcon implements Serializable{
 		Set<String> jarPath = new HashSet<String>();
+	}
+
+	public static class JarEntryInfo implements Serializable{
+		String name;
+		long lastModifyTime;
+		long crc;
+
+		public JarEntryInfo(JarEntry entry) {
+			this.name = entry.getName();
+			this.lastModifyTime = entry.getTime();
+			this.crc = entry.getCrc();
+		}
+
+		public String getName() {
+			return name;
+		}
+
+		public Long getLastModifyTime() {
+			return lastModifyTime;
+		}
+
+		public long getCrc() {
+			return crc;
+		}
+
 	}
 }
