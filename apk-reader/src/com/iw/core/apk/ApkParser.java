@@ -27,11 +27,12 @@ import brut.apktool.Main;
 
 import com.iw.core.common.ApkUtil;
 import com.iw.core.common.FileUtil;
+import com.iw.core.common.Hash;
 
 public class ApkParser {
 	private static final Log log = LogFactory.getLog(ApkParser.class);
 
-	public static String HASH_ALGO = "SHA-512";
+	public static String HASH_ALGO = "SHA-256";
 
 	private static final String MANIFEST = "AndroidManifest.xml";
 	private static final String RESOURCE_DIR = "res";
@@ -115,8 +116,7 @@ public class ApkParser {
 		boolean ret = false;
 		try {
 			File baseFile = new File(tmpDir + File.separator + ASSET_DIR);
-			Collection<File> files = FileUtils.listFiles(baseFile,
-					null, true);
+			Collection<File> files = FileUtils.listFiles(baseFile, null, true);
 
 			for (File file : files) {
 				String relatedPath = baseFile.toURI().relativize(file.toURI())
@@ -240,6 +240,9 @@ public class ApkParser {
 				}
 		}
 		log.info("Entry count:" + info.getEntries().size());
+
+		info.setFileHash(Hash.getFileHash(info.getPath(), HASH_ALGO));
+
 		return ret;
 	}
 

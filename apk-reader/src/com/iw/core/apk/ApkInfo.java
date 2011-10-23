@@ -29,6 +29,8 @@ public class ApkInfo {
 	private ApkIcon icon = new ApkIcon();
 	private ApkScreenSupport screenSupport = new ApkScreenSupport();
 
+	// File hash
+	String fileHash;
 	// Zip entires
 	private Map<String, JarEntry> entries = new Hashtable<String, JarEntry>();
 	// Raw content of AndroidManifest.xml
@@ -39,6 +41,14 @@ public class ApkInfo {
 	private Map<String, String> decompiledClasses = new Hashtable<String, String>();
 	// Raw content of asset
 	private Map<String, String> assets = new Hashtable<String, String>();
+
+	public String getFileHash() {
+		return fileHash;
+	}
+
+	public void setFileHash(String fileHash) {
+		this.fileHash = fileHash;
+	}
 
 	public Map<String, String> getRawResources() {
 		return rawResources;
