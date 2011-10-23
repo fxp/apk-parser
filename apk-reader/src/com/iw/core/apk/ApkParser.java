@@ -5,15 +5,19 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.Collection;
 import java.util.Enumeration;
+import java.util.HashSet;
 import java.util.List;
 import java.util.Set;
 import java.util.jar.JarEntry;
 import java.util.jar.JarFile;
+
 import javax.xml.parsers.DocumentBuilder;
 import javax.xml.parsers.DocumentBuilderFactory;
 import javax.xml.parsers.ParserConfigurationException;
 
+import org.apache.commons.io.FileUtils;
 import org.apache.commons.logging.Log;
 import org.apache.commons.logging.LogFactory;
 import org.w3c.dom.Document;
@@ -30,9 +34,9 @@ public class ApkParser {
 	public static String HASH_ALGO = "SHA-512";
 
 	private static final String MANIFEST = "AndroidManifest.xml";
-	private static final String RESOURCE_BASEDIR = "res";
-	private static final String RESOURCE_VALUEDIR = "values";
-	private static final String RESOURCE = "public.xml";
+	private static final String RESOURCE_DIR = "res";
+	private static final String SMALI_DIR = "smali";
+	private static final String ASSET_DIR = "assets";
 
 	// To be delete after parsing
 	List<String> tmpFiles = new ArrayList<String>();
@@ -76,6 +80,7 @@ public class ApkParser {
 				throw new ParserException(apkPath,
 						"Cannot decompile apk with apktool", e);
 			}
+			System.out.println("Decompiled dir=" + tmpDir);
 
 			// read resource directory
 			if (!readResouse(info, tmpDir))
@@ -85,6 +90,18 @@ public class ApkParser {
 			if (!readManifest(info, tmpDir))
 				return null;
 
+			// Get all icon files
+			getAllIcons(info, tmpDir);
+
+			// Get all decompiled source
+			if (!readDecompiled(info, tmpDir))
+				return null;
+
+			// Get all asset, some interesting stuff
+			if (!readAsset(info, tmpDir))
+				return null;
+
+			ret = info;
 		} catch (Exception e) {
 			e.printStackTrace();
 			ret = null;
@@ -94,8 +111,81 @@ public class ApkParser {
 		return ret;
 	}
 
+	private static boolean readAsset(ApkInfo info, String tmpDir) {
+		boolean ret = false;
+		try {
+			File baseFile = new File(tmpDir + File.separator + ASSET_DIR);
+			Collection<File> files = FileUtils.listFiles(baseFile,
+					null, true);
+
+			for (File file : files) {
+				String relatedPath = baseFile.toURI().relativize(file.toURI())
+						.getPath();
+				String content = FileUtil.getFileContent(
+						file.getAbsolutePath(), null);
+				DecompiledParser.addDecompiled(relatedPath, content, info);
+			}
+			ret = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			ret = false;
+		}
+		return ret;
+	}
+
+	private static void getAllIcons(ApkInfo info, String tmpDir) {
+		Collection<JarEntry> entries = info.getEntries().values();
+		Set<String> iconNames = new HashSet<String>();
+		for (String iconPath : info.getIcon().jarPath) {
+			// All value start with @ means a reference
+			// have to find the real one
+			if (!iconPath.startsWith("@"))
+				continue;
+			iconPath = iconPath.substring(1);
+			int splitOffset = iconPath.lastIndexOf("/");
+			// String prefix = iconPath.substring(0, splitOffset);
+			String postfix = iconPath.substring(splitOffset);
+
+			for (JarEntry entry : entries) {
+				String entryName = entry.getName();
+				if (entryName.startsWith("res/drawable")
+						&& entryName.endsWith(postfix + ".png")) {
+					iconNames.add(entryName);
+				}
+			}
+		}
+		info.setIcon(iconNames);
+	}
+
+	private static boolean readDecompiled(ApkInfo info, String tmpDir) {
+		boolean ret = false;
+		try {
+			File baseFile = new File(tmpDir + File.separator + SMALI_DIR);
+			Collection<File> files = FileUtils.listFiles(baseFile,
+					new String[] { "smali" }, true);
+
+			for (File file : files) {
+				String relatedPath = baseFile.toURI().relativize(file.toURI())
+						.getPath();
+				String content = FileUtil.getFileContent(
+						file.getAbsolutePath(), null);
+				DecompiledParser.addDecompiled(relatedPath, content, info);
+			}
+			ret = true;
+		} catch (Exception e) {
+			e.printStackTrace();
+			ret = false;
+		}
+		return ret;
+	}
+
 	private static void cleanup(ApkInfo info, String tmpDir) {
-		// TODO delete all file under this directory
+		try {
+			FileUtils.deleteDirectory(new File(tmpDir));
+			// Do more cleanup
+		} catch (IOException e) {
+			e.printStackTrace();
+		}
 	}
 
 	private static boolean readBasic(ApkInfo info, String tmpDir)
@@ -156,12 +246,18 @@ public class ApkParser {
 	private static boolean readResouse(ApkInfo info, String tmpDir) {
 		boolean ret = false;
 		try {
-			String resourcePath = (new File(tmpDir + File.separator
-					+ RESOURCE_BASEDIR + File.separator + RESOURCE_VALUEDIR,
-					RESOURCE)).getAbsolutePath();
+			File baseFile = new File(tmpDir + File.separator + RESOURCE_DIR);
+			Collection<File> files = FileUtils.listFiles(baseFile,
+					new String[] { "xml" }, true);
 
-			Document doc = initDoc(resourcePath); 
-			ResourceParser.setResource(doc, info);
+			for (File file : files) {
+				String relatedPath = baseFile.toURI().relativize(file.toURI())
+						.getPath();
+				String content = FileUtil.getFileContent(
+						file.getAbsolutePath(), null);
+				ResourceParser.addResource(relatedPath, content, info);
+			}
+			ret = true;
 		} catch (Exception e) {
 			e.printStackTrace();
 			ret = false;
@@ -207,8 +303,11 @@ public class ApkParser {
 
 	public static void main(String[] args) throws Exception {
 		// unpack apk file
+		// ApkInfo info = ApkParser
+		// .readApk("/home/fxp/Downloads/MobeeBook_soho_11.00.30.apk");
+		// C:\Users\FXP\Downloads
 		ApkInfo info = ApkParser
-				.readApk("/home/fxp/Downloads/MobeeBook_soho_11.00.30.apk");
+				.readApk("C:\\Users\\FXP\\Downloads\\com.yingyonghui.market.1317700156264.apk");
 		System.out.println(info);
 
 	}

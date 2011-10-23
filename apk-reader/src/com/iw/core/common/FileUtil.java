@@ -2,11 +2,11 @@ package com.iw.core.common;
 
 import java.io.BufferedOutputStream;
 import java.io.BufferedReader;
+import java.io.DataInputStream;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.FileNotFoundException;
 import java.io.FileOutputStream;
-import java.io.FileReader;
 import java.io.FilenameFilter;
 import java.io.IOException;
 import java.io.InputStream;
@@ -14,8 +14,6 @@ import java.io.InputStreamReader;
 import java.io.OutputStream;
 import java.nio.channels.FileChannel;
 import java.security.MessageDigest;
-import java.util.ArrayList;
-import java.util.List;
 
 public class FileUtil {
 	public static String RUN_AS_JAR = "RUN_AS_JAR";
@@ -42,55 +40,18 @@ public class FileUtil {
 		return (new File("")).getAbsolutePath();
 	}
 
-	public synchronized static List<File> getAllFiles(String fatherDir,
-			FilenameFilter filter) {
-		File dirFile = new File(fatherDir);
-		ArrayList<File> fileArray = new ArrayList<File>();
-		if (dirFile.isDirectory()) {
-			File[] specFiles = null;
-			File[] allFiles = dirFile.listFiles();
-			if (filter != null)
-				specFiles = dirFile.listFiles(filter);
-			else
-				specFiles = dirFile.listFiles();
-			for (File file : specFiles)
-				fileArray.add(file);
+	public static class OnlyExt implements FilenameFilter {
+		String ext = "";
 
-			for (File file : allFiles) {
-				if (file.isDirectory()) {
-					File[] subFiles = getAllFiles(file, filter);
-					for (File subFile : subFiles)
-						fileArray.add(subFile);
-				}
-			}
-		} else
-			return new ArrayList<File>();
-		return fileArray;
-	}
+		public OnlyExt(String ext) {
+			this.ext = ext;
+		}
 
-	public synchronized static File[] getAllFiles(File fatherDir,
-			FilenameFilter filter) {
-		ArrayList<File> fileArray = new ArrayList<File>();
-		if (fatherDir.isDirectory()) {
-			File[] specFiles = null;
-			File[] allFiles = fatherDir.listFiles();
-			if (filter != null)
-				specFiles = fatherDir.listFiles(filter);
-			else
-				specFiles = fatherDir.listFiles();
-			for (File file : specFiles)
-				fileArray.add(file);
+		@Override
+		public boolean accept(File dir, String name) {
+			return name.endsWith(ext);
+		}
 
-			for (File file : allFiles) {
-				if (file.isDirectory()) {
-					File[] subFiles = getAllFiles(file, filter);
-					for (File subFile : subFiles)
-						fileArray.add(subFile);
-				}
-			}
-		} else
-			return null;
-		return fileArray.toArray(new File[fileArray.size()]);
 	}
 
 	public synchronized static boolean forceDelete(File f) {
@@ -337,21 +298,21 @@ public class FileUtil {
 
 	public synchronized static String getFileContent(String filePath,
 			String encode) {
-		String ret = "";
+		String ret = null;
 		try {
-			BufferedReader reader = new BufferedReader(new InputStreamReader(
-					new FileInputStream(filePath), encode));
-			StringBuffer strBuf = new StringBuffer();
-			String line;
-			while ((line = reader.readLine()) != null) {
-				strBuf.append(line + "\r\n");
+			FileInputStream fstream = new FileInputStream(filePath);
+			DataInputStream in = new DataInputStream(fstream);
+			BufferedReader br = new BufferedReader(new InputStreamReader(in));
+			StringBuffer sb = new StringBuffer();
+			String strLine;
+			// Read File Line By Line
+			while ((strLine = br.readLine()) != null) {
+				sb.append(strLine + "\r\n");
 			}
-			ret = strBuf.toString();
-			reader.close();
-		} catch (FileNotFoundException e) {
-			e.printStackTrace();
-		} catch (IOException e) {
-			e.printStackTrace();
+			in.close();
+			ret = sb.toString();
+		} catch (Exception e) {
+			System.err.println("Error: " + e.getMessage());
 		}
 		return ret;
 	}

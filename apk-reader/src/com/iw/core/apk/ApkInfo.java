@@ -2,9 +2,11 @@ package com.iw.core.apk;
 
 import java.security.cert.Certificate;
 import java.util.ArrayList;
+import java.util.HashSet;
 import java.util.Hashtable;
 import java.util.List;
 import java.util.Map;
+import java.util.Set;
 import java.util.jar.JarEntry;
 
 public class ApkInfo {
@@ -18,26 +20,32 @@ public class ApkInfo {
 	private String minSdkVersion;
 	private String packageName;
 
-	// All permissions with
-	private Map<String, String> permissions = new Hashtable<String, String>();
+	// All permissions
+	private Set<String> permissions = new HashSet<String>();
+	// All certificates
 	private List<Certificate> certs = new ArrayList<Certificate>();
-	private ApkIcon icon;
+
+	// All icon paths
+	private ApkIcon icon = new ApkIcon();
 	private ApkScreenSupport screenSupport = new ApkScreenSupport();
-	private Map<String, List<String>> resStrings = new Hashtable<String, List<String>>();
 
+	// Zip entires
 	private Map<String, JarEntry> entries = new Hashtable<String, JarEntry>();
+	// Raw content of AndroidManifest.xml
 	private String rawAndroidManifest;
-	private Map<String, String> layoutStrings = new Hashtable<String, String>();
+	// Raw content of resources
+	private Map<String, String> rawResources = new Hashtable<String, String>();
+	// Decompiled source like smali or just java source code
 	private Map<String, String> decompiledClasses = new Hashtable<String, String>();
+	// Raw content of asset
+	private Map<String, String> assets = new Hashtable<String, String>();
 
-	public static class ApkPermission {
-		Hashtable<String, String> permissions = new Hashtable<String, String>();
+	public Map<String, String> getRawResources() {
+		return rawResources;
+	}
 
-		public ApkPermission(String type, List<String> values) {
-			for (String value : values) {
-				permissions.put(type, value);
-			}
-		}
+	public void addRawResource(String resourceName, String rawResource) {
+		rawResources.put(resourceName, rawResource);
 	}
 
 	public List<Certificate> getCerts() {
@@ -108,20 +116,26 @@ public class ApkInfo {
 		this.packageName = packageName;
 	}
 
-	public Map<String, String> getPermissions() {
+	public Set<String> getPermissions() {
 		return permissions;
 	}
 
-	public void addPermission(String type, String permission) {
-		this.permissions.put(type, permission);
+	public void addPermission(String permission) {
+		this.permissions.add(permission);
 	}
 
 	public ApkIcon getIcon() {
 		return icon;
 	}
 
-	public void setIcon(ApkIcon icon) {
-		this.icon = icon;
+	public void setIcon(Set<String> jarPaths) {
+		icon.jarPath = jarPaths;
+	}
+
+	public void addIcons(List<String> jarPaths) {
+		for (String jarPath : jarPaths) {
+			icon.jarPath.add(jarPath);
+		}
 	}
 
 	public ApkScreenSupport getScreenSupport() {
@@ -130,14 +144,6 @@ public class ApkInfo {
 
 	public void setScreenSupport(ApkScreenSupport screenSupport) {
 		this.screenSupport = screenSupport;
-	}
-
-	public Map<String, List<String>> getResStrings() {
-		return resStrings;
-	}
-
-	public void setResStrings(Map<String, List<String>> resStrings) {
-		this.resStrings = resStrings;
 	}
 
 	public Map<String, JarEntry> getEntries() {
@@ -156,32 +162,23 @@ public class ApkInfo {
 		this.rawAndroidManifest = rawAndroidManifest;
 	}
 
-	public Map<String, String> getLayoutStrings() {
-		return layoutStrings;
-	}
-
-	public void setLayoutStrings(Map<String, String> layoutStrings) {
-		this.layoutStrings = layoutStrings;
-	}
-
 	public Map<String, String> getDecompiledClasses() {
 		return decompiledClasses;
 	}
 
-	public void setDecompiledClasses(Map<String, String> decompiledClasses) {
-		this.decompiledClasses = decompiledClasses;
+	public void addDecompiledClasses(String decompiledName, String rawDecompiled) {
+		decompiledClasses.put(decompiledName, rawDecompiled);
 	}
 
-	/*
-	 * Format <supports-screens android:resizeable=["true"| "false"]
-	 * android:smallScreens=["true" | "false"] android:normalScreens=["true" |
-	 * "false"] android:largeScreens=["true" | "false"]
-	 * android:xlargeScreens=["true" | "false"] android:anyDensity=["true" |
-	 * "false"] android:requiresSmallestWidthDp="integer"
-	 * android:compatibleWidthLimitDp="integer"
-	 * android:largestWidthLimitDp="integer"/>
-	 */
-	public class ApkScreenSupport {
+	public Map<String, String> getAssets() {
+		return assets;
+	}
+
+	public void addAssets(String assetName, String asset) {
+		this.assets.put(assetName, asset);
+	}
+
+	public static class ApkScreenSupport {
 		Boolean resizeable = null;
 		Boolean smallScreens = null;
 		Boolean normalScreens = null;
@@ -193,8 +190,7 @@ public class ApkInfo {
 		int largestWidthLimitDp = -1;
 	}
 
-	public class ApkIcon {
-		List<String> jarPath;
+	public static class ApkIcon {
+		Set<String> jarPath = new HashSet<String>();
 	}
-
 }

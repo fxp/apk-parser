@@ -1,10 +1,17 @@
 package com.iw.core.apk;
 
 import org.w3c.dom.Document;
+import org.w3c.dom.Element;
+import org.w3c.dom.Node;
+import org.w3c.dom.NodeList;
 
-public class ResourceParser {
+import com.iw.core.common.FileUtil;
 
-	public static void setResource(Document doc, ApkInfo info) {
+public class ResourceParser extends DocumentParser {
+
+	public static void addResource(String docName, String content, ApkInfo info) {
+		info.addRawResource(docName, content);
 	}
+	
 
 }

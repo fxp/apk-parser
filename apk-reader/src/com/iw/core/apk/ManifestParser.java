@@ -11,29 +11,10 @@ import org.w3c.dom.NodeList;
 
 import com.iw.core.apk.ApkInfo.ApkScreenSupport;
 
-public class ManifestParser extends DocumentParser{
+public class ManifestParser extends DocumentParser {
 	private static final Log log = LogFactory.getLog(ManifestParser.class);
 
 	private ManifestParser() {
-	}
-
-	private static List<String> FindInDocument(Document doc, String keyName,
-			String attribName) {
-		List<String> ret = new ArrayList<String>();
-		NodeList usesPermissions = doc.getElementsByTagName(keyName);
-
-		if (usesPermissions != null) {
-			for (int s = 0; s < usesPermissions.getLength(); s++) {
-				Node permissionNode = usesPermissions.item(s);
-				if (permissionNode.getNodeType() == Node.ELEMENT_NODE) {
-					Node node = permissionNode.getAttributes().getNamedItem(
-							attribName);
-					if (node != null)
-						ret.add(node.getNodeValue());
-				}
-			}
-		}
-		return ret;
 	}
 
 	public static boolean parserManifest(Document doc, ApkInfo info) {
@@ -47,77 +28,25 @@ public class ManifestParser extends DocumentParser{
 				"android:versionName"));
 		info.setLabel(FindStringInDocument(doc, "application", "android:label"));
 
+		getIcons(doc, info);
 		getPermissions(doc, info);
 		getScreenSupport(doc, info);
 
-		return false;
+		return true;
 	}
 
-	public static String FindStringInDocument(Document doc, String parent,
-			String attr) {
-		String ret = null;
-		List<String> results = FindInDocument(doc, parent, attr);
-		if (results.size() > 0)
-			ret = results.get(0);
-		return ret;
-	}
+	private static int getIcons(Document doc, ApkInfo info) {
+		info.addIcons(FindStringsInDocument(doc, "application", "android:icon"));
+		info.addIcons(FindStringsInDocument(doc, "application", "a:icon"));
 
-	public static Boolean FindBooleanInDocument(Document doc, String parent,
-			String attr) {
-		Boolean ret = null;
-		List<Boolean> results = FindBooleansInDocument(doc, parent, attr);
-		if (results.size() > 0)
-			ret = results.get(0);
-		return ret;
-	}
-
-	public static Integer FindIntegerInDocument(Document doc, String parent,
-			String attr) {
-		Integer ret = null;
-		List<Integer> results = FindIntegersInDocument(doc, parent, attr);
-		if (results.size() > 0)
-			ret = results.get(0);
-		return ret;
-	}
-
-	public static List<String> FindStringsInDocument(Document doc,
-			String parent, String attr) {
-		return FindInDocument(doc, parent, attr);
-	}
-
-	public static List<Boolean> FindBooleansInDocument(Document doc,
-			String parent, String attr) {
-		List<String> results = FindInDocument(doc, parent, attr);
-		List<Boolean> ret = new ArrayList<Boolean>();
-		for (String result : results) {
-			try {
-				ret.add(Boolean.valueOf(result));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return ret;
-	}
-
-	public static List<Integer> FindIntegersInDocument(Document doc,
-			String parent, String attr) {
-		List<String> results = FindInDocument(doc, parent, attr);
-		List<Integer> ret = new ArrayList<Integer>();
-		for (String result : results) {
-			try {
-				ret.add(Integer.valueOf(result));
-			} catch (Exception e) {
-				e.printStackTrace();
-			}
-		}
-		return ret;
+		return info.getIcon().jarPath.size();
 	}
 
 	public static int addPermissions(Document doc, ApkInfo info, String parent,
 			String attr) {
 		List<String> permissions = FindStringsInDocument(doc, parent, attr);
 		for (String permission : permissions) {
-			info.addPermission(parent, permission);
+			info.addPermission(permission);
 		}
 		return permissions.size();
 	}
