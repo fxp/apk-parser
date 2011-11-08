@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="btn1">大众点评</string>
+    <string name="app_name">IntentTest</string>
+    <string name="btn2">淘宝</string>
+</resources>
